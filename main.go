@@ -13,9 +13,10 @@ import (
 )
 
 type model struct {
-	viewport viewport.Model
-	timeline twitter.Timeline
-	user     twitter.User
+	viewport      viewport.Model
+	timeline      twitter.Timeline
+	user          twitter.User
+	selectedIndex int
 }
 
 type fetchMsg struct {
@@ -24,7 +25,9 @@ type fetchMsg struct {
 }
 
 func main() {
-	m := model{viewport: viewport.New(80, 24)}
+	vp := viewport.New(80, 0)
+	vp.KeyMap = viewport.KeyMap{}
+	m := model{viewport: vp}
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	err := p.Start()
 	if err != nil {
@@ -42,13 +45,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c", "esc":
 			return m, tea.Quit
+		case "j":
+			if m.selectedIndex < len(m.timeline.Tweets)-1 {
+				m.selectedIndex++
+			}
+		case "k":
+			if m.selectedIndex > 0 {
+				m.selectedIndex--
+			}
 		}
 	case tea.WindowSizeMsg:
+		m.viewport.Height = msg.Height
 	case fetchMsg:
 		m.timeline = msg.timeline
 		m.user = msg.user
-		m.viewport.SetContent(m.tweetsView())
 	}
+
+	m.viewport.SetContent(m.tweetsView())
 
 	var cmd tea.Cmd
 	m.viewport, cmd = m.viewport.Update(msg)
@@ -58,10 +71,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) tweetsView() string {
 	var s strings.Builder
 
-	for _, tweet := range m.timeline.Tweets {
+	for i, tweet := range m.timeline.Tweets {
 		authorName := getUserName(m.timeline.Includes.Users, tweet.AuthorID)
-		s.WriteString(style.Tweet.Render(style.Author.Render(authorName) + "\n" + tweet.Text))
-		s.WriteRune('\n')
+		if m.selectedIndex == i {
+			s.WriteString(style.SelectedTweet.Render(style.SelectedAuthor.Render(authorName)+"\n"+tweet.Text) + "\n")
+		} else {
+			s.WriteString(style.Tweet.Render(style.Author.Render(authorName)+"\n"+tweet.Text) + "\n")
+		}
 	}
 
 	return s.String()
