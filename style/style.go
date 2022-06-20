@@ -17,18 +17,29 @@ var (
 		BorderLeft(true).
 		BorderForeground(darkGrey).
 		Width(80).
-		MarginLeft(1).
 		MarginBottom(1).
 		Padding(0, 1)
 
 	// SelectedTweet is the style for a selected tweet.
 	SelectedTweet = Tweet.Copy().BorderForeground(hotPink)
 
-	// Author is the style for the author of a tweet.
-	Author = lipgloss.NewStyle().
-		Foreground(lightGrey)
+	// AuthorName is the style for the author of a tweet.
+	AuthorName = lipgloss.NewStyle().Bold(true)
 
-	// SelectedAuthor is the style for the author of the selected tweet.
-	SelectedAuthor = lipgloss.NewStyle().
-			Bold(true)
+	// AuthorHandle is the style for the handle of a tweet author.
+	AuthorHandle = lipgloss.NewStyle().Foreground(darkGrey).MarginLeft(1)
+
+	// SelectedAuthorHandle is the style for the handle of an author of the
+	// current selected tweet.
+	SelectedAuthorHandle = AuthorHandle.Copy().Foreground(darkGrey)
+
+	// SelectedAuthorName is the style for the author of the selected tweet.
+	SelectedAuthorName = lipgloss.NewStyle().
+				Bold(true)
+
+	// Tab is the style for a navigation tab.
+	Tab = lipgloss.NewStyle().
+		Padding(1).
+		Align(lipgloss.Right).
+		Width(20)
 )

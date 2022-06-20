@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/viewport"
@@ -15,6 +16,7 @@ type model struct {
 	timeline      twitter.Timeline
 	user          twitter.User
 	selectedIndex int
+	scrollOffset  int
 }
 
 type fetchMsg struct {
@@ -39,12 +41,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c", "esc":
 			return m, tea.Quit
-		case "j":
+		case "down", "j", "n":
 			if m.selectedIndex < len(m.timeline.Tweets)-1 {
 				m.selectedIndex++
+				m.scrollOffset += tweetHeight(m.timeline.Tweets[m.selectedIndex])
 			}
-		case "k":
+		case "up", "k", "p":
 			if m.selectedIndex > 0 {
+				m.scrollOffset -= tweetHeight(m.timeline.Tweets[m.selectedIndex])
 				m.selectedIndex--
 			}
 		}
@@ -55,28 +59,59 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.user = msg.user
 	}
 
+	min := m.viewport.YOffset
+	max := min + m.viewport.Height
+	if m.scrollOffset >= max {
+		m.viewport.LineDown(tweetHeight(m.timeline.Tweets[m.selectedIndex]))
+	} else if m.scrollOffset < min {
+		m.viewport.LineUp(tweetHeight(m.timeline.Tweets[m.selectedIndex]))
+	}
 	m.viewport.SetContent(m.tweetsView())
-
 	var cmd tea.Cmd
 	m.viewport, cmd = m.viewport.Update(msg)
 	return m, cmd
 }
 
+func (m model) navigationView() string {
+	var s strings.Builder
+	for _, tab := range []string{"Home", "Explore", "Notification", "Messages", "Bookmarks", "Lists", "Profile"} {
+		s.WriteString(style.Tab.Render(tab))
+	}
+	return s.String()
+}
+
+func (m model) trendingView() string {
+	return fmt.Sprintf("Y Offset %d, Tweet Offset %d", m.viewport.YOffset, m.scrollOffset)
+}
+
+func loadingTweetsView() string {
+	loadingAuthor := style.AuthorName.Render("Loading") + style.AuthorHandle.Render("@loading")
+	loadingTweet := style.Tweet.Render(loadingAuthor+"\n"+"This shouldn't take too long, only a few seconds....") + "\n"
+	return strings.Repeat(loadingTweet, 10)
+}
+
 func (m model) tweetsView() string {
+	if len(m.timeline.Tweets) == 0 {
+		return loadingTweetsView()
+	}
+
 	var s strings.Builder
 
 	for i, tweet := range m.timeline.Tweets {
-		var tweetStyle, authorStyle lipgloss.Style
+		var tweetStyle, authorNameStyle, authorHandleStyle lipgloss.Style
 		if m.selectedIndex == i {
 			tweetStyle = style.SelectedTweet
-			authorStyle = style.SelectedAuthor
+			authorNameStyle = style.SelectedAuthorName
+			authorHandleStyle = style.SelectedAuthorHandle
 		} else {
 			tweetStyle = style.Tweet
-			authorStyle = style.Author
+			authorNameStyle = style.AuthorName
+			authorHandleStyle = style.AuthorHandle
 		}
-		authorName := getUserName(m.timeline.Includes.Users, tweet.AuthorID)
-		authorStyled := authorStyle.Render(authorName)
-		s.WriteString(tweetStyle.Render(authorStyled + "\n" + tweet.Text))
+		author := getAuthor(m.timeline.Includes.Users, tweet.AuthorID)
+		authorNameStyled := authorNameStyle.Render(author.Name)
+		authorHandleStyled := authorHandleStyle.Render("@" + author.Username)
+		s.WriteString(tweetStyle.Render(authorNameStyled + authorHandleStyled + "\n" + tweet.Text))
 		s.WriteRune('\n')
 	}
 
@@ -84,14 +119,25 @@ func (m model) tweetsView() string {
 }
 
 func (m model) View() string {
-	return m.viewport.View()
+	return lipgloss.JoinHorizontal(
+		lipgloss.Center,
+		m.navigationView(),
+		m.viewport.View(),
+		m.trendingView(),
+	)
 }
 
-func getUserName(users []twitter.User, id string) string {
+func tweetHeight(tweet twitter.Tweet) int {
+	tweetHeight := lipgloss.Height(style.Tweet.Render(tweet.Text))
+	authorHeight := 1
+	return tweetHeight + authorHeight
+}
+
+func getAuthor(users []twitter.User, id string) twitter.User {
 	for _, user := range users {
 		if user.ID == id {
-			return user.Name
+			return user
 		}
 	}
-	return ""
+	return twitter.User{}
 }
