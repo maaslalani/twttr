@@ -1,10 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"strings"
-
-	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/maaslalani/twttr/style"
@@ -12,11 +8,10 @@ import (
 )
 
 type model struct {
-	viewport      viewport.Model
 	timeline      twitter.Timeline
 	user          twitter.User
 	selectedIndex int
-	scrollOffset  int
+	height        int
 }
 
 type fetchMsg struct {
@@ -44,86 +39,50 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "down", "j", "n":
 			if m.selectedIndex < len(m.timeline.Tweets)-1 {
 				m.selectedIndex++
-				m.scrollOffset += tweetHeight(m.timeline.Tweets[m.selectedIndex])
 			}
 		case "up", "k", "p":
 			if m.selectedIndex > 0 {
-				m.scrollOffset -= tweetHeight(m.timeline.Tweets[m.selectedIndex])
 				m.selectedIndex--
 			}
 		}
 	case tea.WindowSizeMsg:
-		m.viewport.Height = msg.Height
+		m.height = msg.Height
 	case fetchMsg:
 		m.timeline = msg.timeline
 		m.user = msg.user
 	}
 
-	min := m.viewport.YOffset
-	max := min + m.viewport.Height
-	if m.scrollOffset >= max {
-		m.viewport.LineDown(tweetHeight(m.timeline.Tweets[m.selectedIndex]))
-	} else if m.scrollOffset < min {
-		m.viewport.LineUp(tweetHeight(m.timeline.Tweets[m.selectedIndex]))
-	}
-	m.viewport.SetContent(m.tweetsView())
-	var cmd tea.Cmd
-	m.viewport, cmd = m.viewport.Update(msg)
-	return m, cmd
+	return m, nil
 }
 
 func (m model) navigationView() string {
-	var s strings.Builder
-	for _, tab := range []string{"Home", "Explore", "Notification", "Messages", "Bookmarks", "Lists", "Profile"} {
-		s.WriteString(style.Tab.Render(tab))
-	}
-	return s.String()
+	return lipgloss.PlaceHorizontal(15, lipgloss.Center, "Navigation")
 }
 
-func (m model) trendingView() string {
-	return fmt.Sprintf("Y Offset %d, Tweet Offset %d", m.viewport.YOffset, m.scrollOffset)
-}
-
-func loadingTweetsView() string {
+func (m model) loadingTweetsView() string {
 	loadingAuthor := style.AuthorName.Render("Loading") + style.AuthorHandle.Render("@loading")
-	loadingTweet := style.Tweet.Render(loadingAuthor+"\n"+"This shouldn't take too long, only a few seconds....") + "\n"
-	return strings.Repeat(loadingTweet, 10)
+	loadingTweet := style.LoadingTweet.Render(loadingAuthor+"\n"+"This shouldn't take too long, only a few seconds....") + "\n"
+	return lipgloss.PlaceVertical(m.height, lipgloss.Center, loadingTweet)
 }
 
 func (m model) tweetsView() string {
 	if len(m.timeline.Tweets) == 0 {
-		return loadingTweetsView()
+		return m.loadingTweetsView()
 	}
 
-	var s strings.Builder
-
-	for i, tweet := range m.timeline.Tweets {
-		var tweetStyle, authorNameStyle, authorHandleStyle lipgloss.Style
-		if m.selectedIndex == i {
-			tweetStyle = style.SelectedTweet
-			authorNameStyle = style.SelectedAuthorName
-			authorHandleStyle = style.SelectedAuthorHandle
-		} else {
-			tweetStyle = style.Tweet
-			authorNameStyle = style.AuthorName
-			authorHandleStyle = style.AuthorHandle
-		}
-		author := getAuthor(m.timeline.Includes.Users, tweet.AuthorID)
-		authorNameStyled := authorNameStyle.Render(author.Name)
-		authorHandleStyled := authorHandleStyle.Render("@" + author.Username)
-		s.WriteString(tweetStyle.Render(authorNameStyled + authorHandleStyled + "\n" + tweet.Text))
-		s.WriteRune('\n')
-	}
-
-	return s.String()
+	tweet := m.timeline.Tweets[m.selectedIndex]
+	author := getAuthor(m.timeline.Includes.Users, tweet.AuthorID)
+	authorNameStyled := style.AuthorName.Render(author.Name)
+	authorHandleStyled := style.AuthorHandle.Render("@" + author.Username)
+	styledTweet := style.Tweet.Render(authorNameStyled + authorHandleStyled + "\n" + tweet.Text)
+	return lipgloss.PlaceVertical(m.height, lipgloss.Center, styledTweet)
 }
 
 func (m model) View() string {
 	return lipgloss.JoinHorizontal(
 		lipgloss.Center,
 		m.navigationView(),
-		m.viewport.View(),
-		m.trendingView(),
+		m.tweetsView(),
 	)
 }
 
