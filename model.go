@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/maaslalani/twttr/style"
@@ -12,6 +13,8 @@ type model struct {
 	user          twitter.User
 	selectedIndex int
 	height        int
+	width         int
+	keymap        KeyMap
 }
 
 type fetchMsg struct {
@@ -33,20 +36,25 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "ctrl+c", "esc":
+		switch {
+		case key.Matches(msg, m.keymap.Quit):
 			return m, tea.Quit
-		case "down", "j", "n":
+		case key.Matches(msg, m.keymap.Next):
 			if m.selectedIndex < len(m.timeline.Tweets)-1 {
 				m.selectedIndex++
 			}
-		case "up", "k", "p":
+		case key.Matches(msg, m.keymap.Previous):
 			if m.selectedIndex > 0 {
 				m.selectedIndex--
 			}
+		case key.Matches(msg, m.keymap.Reload):
+			m.timeline.Tweets = nil
+			m.selectedIndex = 0
+			return m, m.Init()
 		}
 	case tea.WindowSizeMsg:
 		m.height = msg.Height
+		m.width = msg.Width
 	case fetchMsg:
 		m.timeline = msg.timeline
 		m.user = msg.user
@@ -55,13 +63,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) navigationView() string {
-	return lipgloss.PlaceHorizontal(15, lipgloss.Center, "Navigation")
-}
-
 func (m model) loadingTweetsView() string {
 	loadingAuthor := style.AuthorName.Render("Loading") + style.AuthorHandle.Render("@loading")
-	loadingTweet := style.LoadingTweet.Render(loadingAuthor+"\n"+"This shouldn't take too long, only a few seconds....") + "\n"
+	loadingTweet := style.LoadingTweet.Render(loadingAuthor+"\n"+"This shouldn't take too long...") + "\n"
 	return lipgloss.PlaceVertical(m.height, lipgloss.Center, loadingTweet)
 }
 
@@ -79,11 +83,7 @@ func (m model) tweetsView() string {
 }
 
 func (m model) View() string {
-	return lipgloss.JoinHorizontal(
-		lipgloss.Center,
-		m.navigationView(),
-		m.tweetsView(),
-	)
+	return m.tweetsView()
 }
 
 func tweetHeight(tweet twitter.Tweet) int {
