@@ -19,19 +19,25 @@ type model struct {
 	view          views.View
 }
 
-type fetchMsg struct {
-	timeline twitter.Timeline
-	user     twitter.User
-}
+type initialMsg struct{}
 
 // Init initializes the model by fetching the current user and the current
 // user's home timeline.
 func (m model) Init() tea.Cmd {
 	return func() tea.Msg {
-		me := twitter.Me()
-		tl := twitter.HomeTimeline(me.ID)
-		return fetchMsg{tl, me}
+		return initialMsg{}
 	}
+}
+
+func fetchTimeline() tea.Msg {
+	me := twitter.Me()
+	tl := twitter.HomeTimeline(me.ID)
+	return fetchMsg{tl, me}
+}
+
+type fetchMsg struct {
+	timeline twitter.Timeline
+	user     twitter.User
 }
 
 // Update the model
@@ -42,10 +48,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keymap.Quit):
 			return m, tea.Quit
 		case key.Matches(msg, m.keymap.Next):
+			m.view = views.Home
 			if m.selectedIndex < len(m.timeline.Tweets)-1 {
 				m.selectedIndex++
 			}
 		case key.Matches(msg, m.keymap.Previous):
+			m.view = views.Home
 			if m.selectedIndex > 0 {
 				m.selectedIndex--
 			}
@@ -65,10 +73,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.height = msg.Height
 		m.width = msg.Width
+	case initialMsg:
+		m.keymap.Next.SetEnabled(false)
+		m.keymap.Previous.SetEnabled(false)
+		m.view = views.Loading
+		return m, fetchTimeline
 	case fetchMsg:
 		m.timeline = msg.timeline
 		m.user = msg.user
 		m.view = views.Home
+
+		m.keymap.Next.SetEnabled(true)
+		m.keymap.Previous.SetEnabled(true)
 	}
 
 	return m, nil
@@ -77,7 +93,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) loadingView() string {
 	loadingAuthor := style.AuthorName.Render("Loading") + style.AuthorHandle.Render("@loading")
 	loadingTweet := style.LoadingTweet.Render(loadingAuthor + "\n" + "This shouldn't take too long...")
-	return lipgloss.PlaceVertical(m.height, lipgloss.Center, loadingTweet)
+	helpText := style.Help.Render("\n" + "Press ? for help")
+	return lipgloss.PlaceVertical(m.height, lipgloss.Center, loadingTweet+helpText)
 }
 
 func (m model) tweetsView() string {
@@ -91,7 +108,20 @@ func (m model) tweetsView() string {
 }
 
 func (m model) helpView() string {
-	return lipgloss.PlaceVertical(m.height, lipgloss.Center, style.Help.Render("? Help"))
+	helpText := `
+	?  Toggle Help
+	q  Quit
+
+	r  Reload Timeline
+	c  Compose Tweet
+
+	n  Next Tweet
+	p  Previous Tweet
+
+	L  Like Tweet
+	R  Retweet Tweet
+	`
+	return lipgloss.PlaceVertical(m.height, lipgloss.Center, style.Help.Render(helpText))
 }
 
 func (m model) View() string {
