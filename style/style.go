@@ -17,7 +17,7 @@ var (
 		BorderLeft(true).
 		BorderForeground(hotPink).
 		Width(80).
-		Margin(0, 5).
+		Margin(1, 5).
 		Padding(0, 3)
 
 	// LoadingTweet is the style for a tweet that is loading.
@@ -28,4 +28,7 @@ var (
 
 	// AuthorHandle is the style for the handle of a tweet author.
 	AuthorHandle = lipgloss.NewStyle().Foreground(darkGrey).MarginLeft(1)
+
+	// Help is the style for the help text.
+	Help = lipgloss.NewStyle().Foreground(lightGrey).Margin(0, 5)
 )

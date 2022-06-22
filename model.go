@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/maaslalani/twttr/style"
 	"github.com/maaslalani/twttr/twitter"
+	"github.com/maaslalani/twttr/views"
 )
 
 type model struct {
@@ -15,6 +16,7 @@ type model struct {
 	height        int
 	width         int
 	keymap        KeyMap
+	view          views.View
 }
 
 type fetchMsg struct {
@@ -48,9 +50,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.selectedIndex--
 			}
 		case key.Matches(msg, m.keymap.Reload):
-			m.timeline.Tweets = nil
 			m.selectedIndex = 0
+			m.view = views.Loading
 			return m, m.Init()
+		case key.Matches(msg, m.keymap.Compose):
+			m.view = views.Compose
+		case key.Matches(msg, m.keymap.Help):
+			if m.view == views.Help {
+				m.view = views.Home
+			} else {
+				m.view = views.Help
+			}
 		}
 	case tea.WindowSizeMsg:
 		m.height = msg.Height
@@ -58,32 +68,45 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case fetchMsg:
 		m.timeline = msg.timeline
 		m.user = msg.user
+		m.view = views.Home
 	}
 
 	return m, nil
 }
 
-func (m model) loadingTweetsView() string {
+func (m model) loadingView() string {
 	loadingAuthor := style.AuthorName.Render("Loading") + style.AuthorHandle.Render("@loading")
-	loadingTweet := style.LoadingTweet.Render(loadingAuthor+"\n"+"This shouldn't take too long...") + "\n"
+	loadingTweet := style.LoadingTweet.Render(loadingAuthor + "\n" + "This shouldn't take too long...")
 	return lipgloss.PlaceVertical(m.height, lipgloss.Center, loadingTweet)
 }
 
 func (m model) tweetsView() string {
-	if len(m.timeline.Tweets) == 0 {
-		return m.loadingTweetsView()
-	}
-
 	tweet := m.timeline.Tweets[m.selectedIndex]
 	author := getAuthor(m.timeline.Includes.Users, tweet.AuthorID)
 	authorNameStyled := style.AuthorName.Render(author.Name)
 	authorHandleStyled := style.AuthorHandle.Render("@" + author.Username)
 	styledTweet := style.Tweet.Render(authorNameStyled + authorHandleStyled + "\n" + tweet.Text)
+
 	return lipgloss.PlaceVertical(m.height, lipgloss.Center, styledTweet)
 }
 
+func (m model) helpView() string {
+	return lipgloss.PlaceVertical(m.height, lipgloss.Center, style.Help.Render("? Help"))
+}
+
 func (m model) View() string {
-	return m.tweetsView()
+	switch m.view {
+	case views.Home:
+		return m.tweetsView()
+	case views.Compose:
+		return "Compose"
+	case views.Help:
+		return m.helpView()
+	case views.Loading:
+		return m.loadingView()
+	}
+
+	return m.loadingView()
 }
 
 func tweetHeight(tweet twitter.Tweet) int {
