@@ -17,11 +17,11 @@ var (
 		BorderLeft(true).
 		BorderForeground(hotPink).
 		Width(80).
-		Margin(1, 5).
-		Padding(0, 3)
+		Margin(1, 1, 2, 1).
+		Padding(0, 2)
 
 	// LoadingTweet is the style for a tweet that is loading.
-	LoadingTweet = Tweet.Copy().BorderForeground(darkGrey)
+	LoadingTweet = Tweet.Copy().BorderForeground(darkGrey).Margin(1)
 
 	// AuthorName is the style for the author of a tweet.
 	AuthorName = lipgloss.NewStyle().Bold(true)
@@ -30,5 +30,11 @@ var (
 	AuthorHandle = lipgloss.NewStyle().Foreground(darkGrey).MarginLeft(1)
 
 	// Help is the style for the help text.
-	Help = lipgloss.NewStyle().Foreground(lightGrey).Margin(0, 5)
+	Help = lipgloss.NewStyle().Foreground(lightGrey).Margin(0, 2)
+
+	// Compose is the style for the compose a tweet text.
+	Compose = lipgloss.NewStyle().Border(lipgloss.ThickBorder(), true).Margin(0, 1)
+
+	// Prompt is the style for the compose tweet multi-line prompt.
+	Prompt = lipgloss.NewStyle().Foreground(darkGrey).Margin(0, 1)
 )

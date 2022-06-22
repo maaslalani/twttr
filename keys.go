@@ -1,6 +1,8 @@
 package main
 
-import "github.com/charmbracelet/bubbles/key"
+import (
+	"github.com/charmbracelet/bubbles/key"
+)
 
 // KeyMap is a map of key bindings.
 // It defines the actions that a user can take.
@@ -54,5 +56,14 @@ var DefaultKeyMap = KeyMap{
 	Retweet: key.NewBinding(
 		key.WithKeys("R"),
 		key.WithHelp("R", "retweet"),
+	),
+}
+
+// ComposingKeyMap is the key map while composing a tweet.
+// It is mostly empty because we need the text area to consume all the input.
+var ComposingKeyMap = KeyMap{
+	Quit: key.NewBinding(
+		key.WithKeys("esc", "ctrl+c"),
+		key.WithHelp("esc", "quit"),
 	),
 }

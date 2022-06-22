@@ -5,6 +5,7 @@ import (
 	"os/exec"
 
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/maaslalani/twttr/style"
@@ -20,6 +21,7 @@ type model struct {
 	user          twitter.User
 	view          views.View
 	width         int
+	textarea      textarea.Model
 }
 
 type initialMsg struct{}
@@ -49,6 +51,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keymap.Quit):
+			if m.view != views.Home {
+				m.view = views.Home
+				m.textarea.Reset()
+				m.textarea.Blur()
+				m.keymap = DefaultKeyMap
+				break
+			}
 			return m, tea.Quit
 		case key.Matches(msg, m.keymap.Next):
 			m.view = views.Home
@@ -70,7 +79,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.view = views.Loading
 			return m, m.Init()
 		case key.Matches(msg, m.keymap.Compose):
+			m.keymap = ComposingKeyMap
 			m.view = views.Compose
+			m.textarea.Focus()
+			// We return here to avoid the text area capturing the key binding
+			// that led to the compose view.
+			var cmd tea.Cmd
+			// Note that we don't forward the message.
+			m.textarea, cmd = m.textarea.Update(nil)
+			return m, cmd
 		case key.Matches(msg, m.keymap.Help):
 			if m.view == views.Help {
 				m.view = views.Home
@@ -95,14 +112,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.keymap.Previous.SetEnabled(true)
 	}
 
-	return m, nil
+	var cmd tea.Cmd
+	m.textarea, cmd = m.textarea.Update(msg)
+	return m, cmd
 }
 
 func (m model) loadingView() string {
 	loadingAuthor := style.AuthorName.Render("Loading") + style.AuthorHandle.Render("@loading")
 	loadingTweet := style.LoadingTweet.Render(loadingAuthor + "\n" + "This shouldn't take too long...")
 	helpText := style.Help.Render("\n" + "Press ? for help")
-	return lipgloss.PlaceVertical(m.height, lipgloss.Center, loadingTweet+helpText)
+	return loadingTweet + helpText
 }
 
 func (m model) tweetsView() string {
@@ -111,30 +130,26 @@ func (m model) tweetsView() string {
 	authorNameStyled := style.AuthorName.Render(author.Name)
 	authorHandleStyled := style.AuthorHandle.Render("@" + author.Username)
 	styledTweet := style.Tweet.Render(authorNameStyled + authorHandleStyled + "\n" + tweet.Text)
-
-	return lipgloss.PlaceVertical(m.height, lipgloss.Center, styledTweet)
+	return styledTweet
 }
 
 func (m model) composeView() string {
-	return lipgloss.PlaceVertical(m.height, lipgloss.Center, "Compose a tweet")
+	tweet := m.textarea.View()
+	return "\n" + tweet
 }
 
 func (m model) helpView() string {
-	helpText := `
-	?  Toggle Help
-	q  Quit
+	navigationHelp := style.Help.Render(`
+?  Toggle Help
+r  Reload Timeline
+c  Compose Tweet`)
 
-	r  Reload Timeline
-	c  Compose Tweet
+	tweetHelp := style.Help.Render(`
+n  Next Tweet
+p  Previous Tweet
+o  Open Tweet in Browser`)
 
-	n  Next Tweet
-	p  Previous Tweet
-
-	L  Like Tweet
-	R  Retweet Tweet
-	o  Open in Browser
-	`
-	return lipgloss.PlaceVertical(m.height, lipgloss.Center, style.Help.Render(helpText))
+	return lipgloss.JoinHorizontal(lipgloss.Top, navigationHelp, tweetHelp)
 }
 
 func (m model) View() string {
