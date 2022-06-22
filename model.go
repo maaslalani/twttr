@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os/exec"
+
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -10,13 +13,13 @@ import (
 )
 
 type model struct {
+	height        int
+	keymap        KeyMap
+	selectedIndex int
 	timeline      twitter.Timeline
 	user          twitter.User
-	selectedIndex int
-	height        int
-	width         int
-	keymap        KeyMap
 	view          views.View
+	width         int
 }
 
 type initialMsg struct{}
@@ -57,6 +60,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.selectedIndex > 0 {
 				m.selectedIndex--
 			}
+		case key.Matches(msg, m.keymap.Open):
+			tweet := m.timeline.Tweets[m.selectedIndex]
+			author := getAuthor(m.timeline.Includes.Users, tweet.AuthorID)
+			url := fmt.Sprintf("https://twitter.com/%s/status/%s", author.Username, tweet.ID)
+			exec.Command("open", url).Run()
 		case key.Matches(msg, m.keymap.Reload):
 			m.selectedIndex = 0
 			m.view = views.Loading
@@ -107,6 +115,10 @@ func (m model) tweetsView() string {
 	return lipgloss.PlaceVertical(m.height, lipgloss.Center, styledTweet)
 }
 
+func (m model) composeView() string {
+	return lipgloss.PlaceVertical(m.height, lipgloss.Center, "Compose a tweet")
+}
+
 func (m model) helpView() string {
 	helpText := `
 	?  Toggle Help
@@ -120,6 +132,7 @@ func (m model) helpView() string {
 
 	L  Like Tweet
 	R  Retweet Tweet
+	o  Open in Browser
 	`
 	return lipgloss.PlaceVertical(m.height, lipgloss.Center, style.Help.Render(helpText))
 }
@@ -129,7 +142,7 @@ func (m model) View() string {
 	case views.Home:
 		return m.tweetsView()
 	case views.Compose:
-		return "Compose"
+		return m.composeView()
 	case views.Help:
 		return m.helpView()
 	case views.Loading:

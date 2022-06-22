@@ -9,6 +9,7 @@ type KeyMap struct {
 	Help     key.Binding
 	Like     key.Binding
 	Next     key.Binding
+	Open     key.Binding
 	Previous key.Binding
 	Quit     key.Binding
 	Reload   key.Binding
@@ -18,7 +19,10 @@ type KeyMap struct {
 // DefaultKeyMap is the default key map that controls navigation and user
 // actions for the application.
 var DefaultKeyMap = KeyMap{
-	Compose: key.NewBinding(),
+	Compose: key.NewBinding(
+		key.WithKeys("c"),
+		key.WithHelp("c", "compose tweet"),
+	),
 	Help: key.NewBinding(
 		key.WithKeys("?"),
 		key.WithHelp("?", "help"),
@@ -30,6 +34,10 @@ var DefaultKeyMap = KeyMap{
 	Next: key.NewBinding(
 		key.WithKeys("right", "down", "l", "j", "n"),
 		key.WithHelp("n", "next tweet"),
+	),
+	Open: key.NewBinding(
+		key.WithKeys("o"),
+		key.WithHelp("o", "open in browser"),
 	),
 	Previous: key.NewBinding(
 		key.WithKeys("left", "up", "h", "k", "p"),
