@@ -98,6 +98,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.height = msg.Height
 		m.width = msg.Width
+		style.Tweet.Width(m.width)
 	case initialMsg:
 		m.keymap.Next.SetEnabled(false)
 		m.keymap.Previous.SetEnabled(false)
