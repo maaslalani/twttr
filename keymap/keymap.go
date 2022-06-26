@@ -1,12 +1,12 @@
-package main
+package keymap
 
 import (
 	"github.com/charmbracelet/bubbles/key"
 )
 
-// KeyMap is a map of key bindings.
+// Keymap is a map of key bindings.
 // It defines the actions that a user can take.
-type KeyMap struct {
+type Keymap struct {
 	Compose  key.Binding
 	Help     key.Binding
 	Like     key.Binding
@@ -19,9 +19,9 @@ type KeyMap struct {
 	Tweet    key.Binding
 }
 
-// DefaultKeyMap is the default key map that controls navigation and user
+// Default is the default key map that controls navigation and user
 // actions for the application.
-var DefaultKeyMap = KeyMap{
+var Default = Keymap{
 	Compose: key.NewBinding(
 		key.WithKeys("c"),
 		key.WithHelp("c", "compose tweet"),
@@ -60,9 +60,9 @@ var DefaultKeyMap = KeyMap{
 	),
 }
 
-// ComposingKeyMap is the key map while composing a tweet.
+// Composing is the key map while composing a tweet.
 // It is mostly empty because we need the text area to consume all the input.
-var ComposingKeyMap = KeyMap{
+var Composing = Keymap{
 	Quit: key.NewBinding(
 		key.WithKeys("esc", "ctrl+c"),
 		key.WithHelp("esc", "quit"),
@@ -73,8 +73,8 @@ var ComposingKeyMap = KeyMap{
 	),
 }
 
-// LoadingKeyMap is the key map while loading tweets.
-var LoadingKeyMap = KeyMap{
+// Loading is the key map while loading tweets.
+var Loading = Keymap{
 	Quit: key.NewBinding(
 		key.WithKeys("esc", "ctrl+c"),
 		key.WithHelp("esc", "quit"),
@@ -85,8 +85,8 @@ var LoadingKeyMap = KeyMap{
 	),
 }
 
-// ErrorKeyMap is the key map while displaying an error.
-var ErrorKeyMap = KeyMap{
+// Error is the key map while displaying an error.
+var Error = Keymap{
 	Quit: key.NewBinding(
 		key.WithKeys("esc", "ctrl+c"),
 		key.WithHelp("esc", "Return to the previous screen"),

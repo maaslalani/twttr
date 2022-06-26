@@ -7,12 +7,13 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/maaslalani/twttr/keymap"
 	"github.com/maaslalani/twttr/twitter"
 )
 
 type model struct {
 	height        int
-	keymap        KeyMap
+	keymap        keymap.Keymap
 	selectedIndex int
 	timeline      twitter.Timeline
 	user          twitter.User
@@ -74,7 +75,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.view = HomeView
 				m.textarea.Reset()
 				m.textarea.Blur()
-				m.keymap = DefaultKeyMap
+				m.keymap = keymap.Default
 				break
 			}
 			return m, tea.Quit
@@ -98,7 +99,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.view = LoadingView
 			return m, m.Init()
 		case key.Matches(msg, m.keymap.Compose):
-			m.keymap = ComposingKeyMap
+			m.keymap = keymap.Composing
 			m.view = ComposeView
 			m.textarea.Reset()
 			m.textarea.Focus()
@@ -122,11 +123,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.height = msg.Height
 		m.width = min(msg.Width, maxTweetWidth)
 	case initialMsg:
-		m.keymap = LoadingKeyMap
+		m.keymap = keymap.Loading
 		m.view = LoadingView
 		return m, fetchTimeline
 	case errorMsg:
-		m.keymap = ErrorKeyMap
+		m.keymap = keymap.Error
 		m.err = msg.err
 		m.view = ErrorView
 	case fetchMsg:
@@ -136,10 +137,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.view = HomeView
 		}
 
-		m.keymap = DefaultKeyMap
+		m.keymap = keymap.Default
 	case sentTweetMsg:
 		m.view = HomeView
-		m.keymap = DefaultKeyMap
+		m.keymap = keymap.Default
 		return m, fetchTimeline
 	}
 

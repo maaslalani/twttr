@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/maaslalani/twttr/keymap"
 	"github.com/maaslalani/twttr/style"
 )
 
@@ -18,7 +19,7 @@ func main() {
 	textarea.Prompt = lipgloss.ThickBorder().Left
 	textarea.PromptStyle = style.Prompt
 
-	m := model{keymap: DefaultKeyMap, view: LoadingView, textarea: textarea}
+	m := model{keymap: keymap.Default, view: LoadingView, textarea: textarea}
 	err := tea.NewProgram(m).Start()
 	if err != nil {
 		log.Fatal(err)
