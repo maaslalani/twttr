@@ -1,14 +1,5 @@
 package twitter
 
-import (
-	"encoding/json"
-)
-
-// CreateTweetRequest represents a request for creating a new tweet.
-type CreateTweetRequest struct {
-	Text string `json:"text"`
-}
-
 // CreateTweetResponseData represents the data returned from a successful tweet
 // creation.
 type CreateTweetResponseData struct {
@@ -23,11 +14,6 @@ type CreateTweetResponse struct {
 
 // CreateTweet creates a new tweet on behalf of the authenticated user.
 func CreateTweet(text string) error {
-	request := CreateTweetRequest{Text: text}
-	data, err := json.Marshal(request)
-	if err != nil {
-		return err
-	}
-	_, err = Twurl("/2/tweets", "-X", "POST", "-d", string(data))
+	_, err := Twurl("/2/tweets", "-X", "POST", "-d", "text="+text)
 	return err
 }
