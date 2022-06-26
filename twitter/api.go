@@ -5,8 +5,8 @@ import (
 )
 
 // Twurl executes the twurl command.
-func Twurl(request string) ([]byte, error) {
-	c := exec.Command("twurl", request)
+func Twurl(args ...string) ([]byte, error) {
+	c := exec.Command("twurl", args...)
 	out, err := c.Output()
 	return out, err
 }

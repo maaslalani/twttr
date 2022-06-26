@@ -34,15 +34,23 @@ func (m model) Init() tea.Cmd {
 	}
 }
 
+type fetchMsg struct {
+	timeline twitter.Timeline
+	user     twitter.User
+}
+
 func fetchTimeline() tea.Msg {
 	me := twitter.Me()
 	tl := twitter.HomeTimeline(me.ID)
 	return fetchMsg{tl, me}
 }
 
-type fetchMsg struct {
-	timeline twitter.Timeline
-	user     twitter.User
+type sentTweetMsg struct{}
+
+func (m model) sendTweet() tea.Msg {
+	text := m.textarea.Value()
+	twitter.CreateTweet(text)
+	return sentTweetMsg{}
 }
 
 // Update the model
@@ -81,6 +89,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keymap.Compose):
 			m.keymap = ComposingKeyMap
 			m.view = views.Compose
+			m.textarea.Reset()
 			m.textarea.Focus()
 			// We return here to avoid the text area capturing the key binding
 			// that led to the compose view.
@@ -88,6 +97,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Note that we don't forward the message.
 			m.textarea, cmd = m.textarea.Update(nil)
 			return m, cmd
+		case key.Matches(msg, m.keymap.Tweet):
+			m.view = views.Loading
+			return m, m.sendTweet
 		case key.Matches(msg, m.keymap.Help):
 			if m.view == views.Help {
 				m.view = views.Home
@@ -111,6 +123,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		m.keymap.Next.SetEnabled(true)
 		m.keymap.Previous.SetEnabled(true)
+	case sentTweetMsg:
+		m.view = views.Home
+		m.keymap = DefaultKeyMap
+		return m, fetchTimeline
 	}
 
 	var cmd tea.Cmd

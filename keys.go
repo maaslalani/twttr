@@ -16,6 +16,7 @@ type KeyMap struct {
 	Quit     key.Binding
 	Reload   key.Binding
 	Retweet  key.Binding
+	Tweet    key.Binding
 }
 
 // DefaultKeyMap is the default key map that controls navigation and user
@@ -65,5 +66,9 @@ var ComposingKeyMap = KeyMap{
 	Quit: key.NewBinding(
 		key.WithKeys("esc", "ctrl+c"),
 		key.WithHelp("esc", "quit"),
+	),
+	Tweet: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "send tweet"),
 	),
 }
