@@ -42,11 +42,11 @@ func (m model) tweetingView() string {
 }
 
 func (m model) tweetsView() string {
-	tweet := m.timeline.Tweets[m.selectedIndex]
-	author := getAuthor(m.timeline.Includes.Users, tweet.AuthorID)
-	authorNameStyled := style.AuthorName.Render(author.Name)
-	authorHandleStyled := style.AuthorHandle.Render("@" + author.Username)
-	styledTweet := style.Tweet.Render(authorNameStyled + authorHandleStyled + "\n" + wordwrap.String(tweet.Text, m.width))
+	// tweet := m.timeline.Tweets[m.selectedIndex]
+	// author := getAuthor(m.timeline.Includes.Users, tweet.AuthorID)
+	authorNameStyled := style.AuthorName.Render("jack")
+	authorHandleStyled := style.AuthorHandle.Render("@" + "jack")
+	styledTweet := style.Tweet.Render(authorNameStyled + authorHandleStyled + "\n" + wordwrap.String("just setting up my twttr", m.width))
 	return styledTweet
 }
 
