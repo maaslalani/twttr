@@ -42,9 +42,6 @@ go install github.com/maaslalani/twttr@latest
 Install `twurl` with any package manager.
 
 ```bash
-# Brew
-brew install twurl
-
 # Gem
 gem install twurl
 
