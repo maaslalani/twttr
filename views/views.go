@@ -8,6 +8,9 @@ const (
 	// Loading is the view when the model is fetching data from the
 	// server, in this case the Twitter API.
 	Loading View = iota
+	// Tweeting is the view when the user has sent a tweet while it is still
+	// loading.
+	Tweeting
 	// Help is the view to show when the user requests to view all of the
 	// keybindings.
 	Help

@@ -16,7 +16,6 @@ var (
 		Border(lipgloss.ThickBorder(), false).
 		BorderLeft(true).
 		BorderForeground(hotPink).
-		Width(80).
 		Margin(1, 1, 2, 1).
 		Padding(0, 2)
 

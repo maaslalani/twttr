@@ -98,7 +98,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textarea, cmd = m.textarea.Update(nil)
 			return m, cmd
 		case key.Matches(msg, m.keymap.Tweet):
-			m.view = views.Loading
+			m.view = views.Tweeting
 			return m, m.sendTweet
 		case key.Matches(msg, m.keymap.Help):
 			if m.view == views.Help {
@@ -141,6 +141,12 @@ func (m model) loadingView() string {
 	return loadingTweet + helpText
 }
 
+func (m model) tweetingView() string {
+	author := style.AuthorName.Render(m.user.Name) + style.AuthorHandle.Render("@"+m.user.Username)
+	sentTweet := style.LoadingTweet.Render(author + "\n" + m.textarea.Value())
+	return sentTweet
+}
+
 func (m model) tweetsView() string {
 	tweet := m.timeline.Tweets[m.selectedIndex]
 	author := getAuthor(m.timeline.Includes.Users, tweet.AuthorID)
@@ -179,6 +185,8 @@ func (m model) View() string {
 		return m.helpView()
 	case views.Loading:
 		return m.loadingView()
+	case views.Tweeting:
+		return m.tweetingView()
 	}
 
 	return m.loadingView()
