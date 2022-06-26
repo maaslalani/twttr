@@ -11,17 +11,24 @@ When you first launch `twttr`, you will see your home timeline. Press `→/n/j/l
 
 ![Home Timeline](https://user-images.githubusercontent.com/42545625/175827521-898f777a-2f3d-4ad7-90a2-5f51c0cc4320.png)
 
-### Keybindings
+### Help
 
 Press `?` to access help which shows you the keybindings to navigate around.
 
 ![Help Page](https://user-images.githubusercontent.com/42545625/175827520-8e6adf19-5e5d-41d3-9f37-8a3308ba434e.png)
+
+### Refresh
+
+Press `r` to reload your home timeline.
+
+![Reload Timeline](https://user-images.githubusercontent.com/42545625/175827523-ca596fe2-faa2-4e45-bd04-2b776ace9a98.png)
 
 ### Compose Tweet
 
 Press `c` to compose a new tweet and type what's on your mind, hit `enter` to share with the world right from your terminal.
 
 ![Compose Tweet](https://user-images.githubusercontent.com/42545625/175827518-6e82b5e2-faa7-4392-9d9e-023adfab4824.png)
+
 ## Installation
 
 Install `twttr` with Go.
