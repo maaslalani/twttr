@@ -6,6 +6,7 @@ import (
 
 const (
 	hotPink   = lipgloss.Color("#FF00FF")
+	red       = lipgloss.Color("1")
 	lightGrey = lipgloss.Color("#5F5F5F")
 	darkGrey  = lipgloss.Color("#444444")
 )
@@ -33,8 +34,8 @@ var (
 		BorderLeft(true).
 		Margin(1, 1, 2, 1).
 		Padding(0, 2).
-		BorderForeground(lipgloss.Color("#FF5555")).
-		Foreground(lipgloss.Color("#FF5555"))
+		BorderForeground(lipgloss.Color(red)).
+		Foreground(lipgloss.Color(red))
 
 	// Help is the style for the help text.
 	Help = lipgloss.NewStyle().Foreground(lightGrey).Margin(0, 2)

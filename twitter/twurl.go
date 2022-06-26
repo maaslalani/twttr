@@ -7,8 +7,9 @@ import (
 )
 
 const twurlNotInstalled = `Looks like twurl is not installed on your machine.
-To use twttr, you'll need to install twurl (https://github.com/twitter/twurl)
-and follow the instructions to get setup with a developer account`
+To use twttr, you'll need to:
+  1. Install twurl (https://github.com/twitter/twurl)
+  2. Get a twitter developer account (https://developer.twitter.com/apply-for-access)`
 
 // Twurl executes the twurl command.
 func Twurl(args ...string) ([]byte, error) {
