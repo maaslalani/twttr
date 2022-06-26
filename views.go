@@ -4,6 +4,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/maaslalani/twttr/style"
 	"github.com/maaslalani/twttr/twitter"
+	"github.com/muesli/reflow/wordwrap"
 )
 
 // View is a type that represents a view in the application.
@@ -45,7 +46,7 @@ func (m model) tweetsView() string {
 	author := getAuthor(m.timeline.Includes.Users, tweet.AuthorID)
 	authorNameStyled := style.AuthorName.Render(author.Name)
 	authorHandleStyled := style.AuthorHandle.Render("@" + author.Username)
-	styledTweet := style.Tweet.Render(authorNameStyled + authorHandleStyled + "\n" + tweet.Text)
+	styledTweet := style.Tweet.Render(authorNameStyled + authorHandleStyled + "\n" + wordwrap.String(tweet.Text, m.width))
 	return styledTweet
 }
 
@@ -89,4 +90,13 @@ func tweetHeight(tweet twitter.Tweet) int {
 	tweetHeight := lipgloss.Height(style.Tweet.Render(tweet.Text))
 	authorHeight := 1
 	return tweetHeight + authorHeight
+}
+
+const maxTweetWidth = 80
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

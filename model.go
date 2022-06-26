@@ -7,7 +7,6 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/maaslalani/twttr/style"
 	"github.com/maaslalani/twttr/twitter"
 )
 
@@ -107,8 +106,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.WindowSizeMsg:
 		m.height = msg.Height
-		m.width = msg.Width
-		style.Tweet.Width(m.width)
+		m.width = min(msg.Width, maxTweetWidth)
 	case initialMsg:
 		m.keymap.Next.SetEnabled(false)
 		m.keymap.Previous.SetEnabled(false)
