@@ -19,6 +19,7 @@ type model struct {
 	view          View
 	width         int
 	textarea      textarea.Model
+	err           error
 }
 
 type initialMsg struct{}
@@ -36,9 +37,19 @@ type fetchMsg struct {
 	user     twitter.User
 }
 
+type errorMsg struct {
+	err error
+}
+
 func fetchTimeline() tea.Msg {
-	me := twitter.Me()
-	tl := twitter.HomeTimeline(me.ID)
+	me, err := twitter.Me()
+	if err != nil {
+		return errorMsg{err: err}
+	}
+	tl, err := twitter.HomeTimeline(me.ID)
+	if err != nil {
+		return errorMsg{err: err}
+	}
 	return fetchMsg{tl, me}
 }
 
@@ -46,7 +57,10 @@ type sentTweetMsg struct{}
 
 func (m model) sendTweet() tea.Msg {
 	text := m.textarea.Value()
-	twitter.CreateTweet(text)
+	err := twitter.CreateTweet(text)
+	if err != nil {
+		return errorMsg{err: err}
+	}
 	return sentTweetMsg{}
 }
 
@@ -108,17 +122,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.height = msg.Height
 		m.width = min(msg.Width, maxTweetWidth)
 	case initialMsg:
-		m.keymap.Next.SetEnabled(false)
-		m.keymap.Previous.SetEnabled(false)
+		m.keymap = LoadingKeyMap
 		m.view = LoadingView
 		return m, fetchTimeline
+	case errorMsg:
+		m.keymap = ErrorKeyMap
+		m.err = msg.err
+		m.view = ErrorView
 	case fetchMsg:
 		m.timeline = msg.timeline
 		m.user = msg.user
-		m.view = HomeView
+		if m.view == LoadingView {
+			m.view = HomeView
+		}
 
-		m.keymap.Next.SetEnabled(true)
-		m.keymap.Previous.SetEnabled(true)
+		m.keymap = DefaultKeyMap
 	case sentTweetMsg:
 		m.view = HomeView
 		m.keymap = DefaultKeyMap

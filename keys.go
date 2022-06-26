@@ -72,3 +72,23 @@ var ComposingKeyMap = KeyMap{
 		key.WithHelp("enter", "send tweet"),
 	),
 }
+
+// LoadingKeyMap is the key map while loading tweets.
+var LoadingKeyMap = KeyMap{
+	Quit: key.NewBinding(
+		key.WithKeys("esc", "ctrl+c"),
+		key.WithHelp("esc", "quit"),
+	),
+	Help: key.NewBinding(
+		key.WithKeys("?"),
+		key.WithHelp("?", "help"),
+	),
+}
+
+// ErrorKeyMap is the key map while displaying an error.
+var ErrorKeyMap = KeyMap{
+	Quit: key.NewBinding(
+		key.WithKeys("esc", "ctrl+c"),
+		key.WithHelp("esc", "Return to the previous screen"),
+	),
+}

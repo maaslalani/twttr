@@ -7,6 +7,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.21.0
 	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/muesli/reflow v0.3.0
+	github.com/pkg/errors v0.9.1
 )
 
 require (

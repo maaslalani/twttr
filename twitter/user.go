@@ -18,12 +18,12 @@ type UserResponse struct {
 }
 
 // Me returns the current user's profile
-func Me() User {
+func Me() (User, error) {
 	response := UserResponse{}
 	bytes, err := Twurl("/2/users/me")
 	if err != nil {
-		return User{}
+		return User{}, err
 	}
 	json.Unmarshal(bytes, &response)
-	return response.Data
+	return response.Data, nil
 }

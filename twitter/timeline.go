@@ -35,12 +35,12 @@ type Meta struct {
 }
 
 // HomeTimeline returns the user's home timeline
-func HomeTimeline(uid string) Timeline {
+func HomeTimeline(uid string) (Timeline, error) {
 	response := Timeline{}
 	bytes, err := Twurl(fmt.Sprintf("/2/users/%s/timelines/reverse_chronological?tweet.fields=created_at&expansions=author_id&exclude=replies,retweets", uid))
 	if err != nil {
-		return Timeline{}
+		return Timeline{}, err
 	}
 	json.Unmarshal(bytes, &response)
-	return response
+	return response, nil
 }

@@ -28,6 +28,14 @@ var (
 	// AuthorHandle is the style for the handle of a tweet author.
 	AuthorHandle = lipgloss.NewStyle().Foreground(darkGrey).MarginLeft(1)
 
+	// Error is the style for an error message
+	Error = lipgloss.NewStyle().Border(lipgloss.ThickBorder(), false).
+		BorderLeft(true).
+		Margin(1, 1, 2, 1).
+		Padding(0, 2).
+		BorderForeground(lipgloss.Color("#FF5555")).
+		Foreground(lipgloss.Color("#FF5555"))
+
 	// Help is the style for the help text.
 	Help = lipgloss.NewStyle().Foreground(lightGrey).Margin(0, 2)
 

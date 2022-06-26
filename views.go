@@ -26,6 +26,8 @@ const (
 	// HomeView is the view to show when the user is viewing their home
 	// timeline.
 	HomeView
+	// ErrorView is the view to show when the user has encountered an error.
+	ErrorView
 )
 
 func (m model) loadingView() string {
@@ -35,6 +37,12 @@ func (m model) loadingView() string {
 	return loadingTweet + helpText
 }
 
+func (m model) errorView() string {
+	errorText := wordwrap.String(m.err.Error(), m.width)
+	styledError := style.Error.Render(errorText)
+	return styledError
+}
+
 func (m model) tweetingView() string {
 	author := style.AuthorName.Render(m.user.Name) + style.AuthorHandle.Render("@"+m.user.Username)
 	sentTweet := style.LoadingTweet.Render(author + "\n" + m.textarea.Value())
@@ -42,6 +50,9 @@ func (m model) tweetingView() string {
 }
 
 func (m model) tweetsView() string {
+	if len(m.timeline.Tweets) == 0 {
+		return style.Error.Render("No tweets to display")
+	}
 	tweet := m.timeline.Tweets[m.selectedIndex]
 	author := getAuthor(m.timeline.Includes.Users, tweet.AuthorID)
 	authorNameStyled := style.AuthorName.Render(author.Name)
@@ -81,6 +92,8 @@ func (m model) View() string {
 		return m.loadingView()
 	case TweetingView:
 		return m.tweetingView()
+	case ErrorView:
+		return m.errorView()
 	}
 
 	return m.loadingView()
