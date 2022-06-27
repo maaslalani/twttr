@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# GET user's timeline
+if [[ "$1" =~ /2/users/[0-9]+/timelines/reverse_chronological.* ]]; then
+	sleep 1
+	echo '{"data":[{"created_at":"2006-03-21T20:50:14.000Z","author_id":"12","text":"just setting up my twttr","id":"20"},{"created_at":"2006-03-21T20:50:14.000Z","author_id":"13","text":"just setting up my twttr","id":"21"}],"includes":{"users":[{"id":"12","name":"jack","username":"jack"},{"id":"13","name":"Biz Stone","username":"biz"}]},"meta":{"result_count":2,"newest_id":"21","oldest_id":"20","next_token":"20"}}'
+fi
+
+# GET user
+if [[ "$1" =~ /2/users/me ]]; then
+	echo '{"data":{"id":"12","name":"jack","username":"jack"}}'
+fi
+
+# POST tweet
+if [[ "$1" =~ /2/tweets ]]; then
+	sleep 1
+	echo '{"data":{"id":"23","text":"trying to post a tweet"}}'
+fi
