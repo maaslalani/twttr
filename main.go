@@ -13,11 +13,12 @@ import (
 func main() {
 	textarea := textarea.New()
 	textarea.CharLimit = 280
-	textarea.Height = 3
-	textarea.Width = 50
+	textarea.SetHeight(3)
+	textarea.SetWidth(50)
 	textarea.Placeholder = "What's happening?"
-	textarea.Prompt = lipgloss.ThickBorder().Left
-	textarea.PromptStyle = style.Prompt
+	textarea.FocusedStyle.Prompt = style.Prompt
+	textarea.FocusedStyle.CursorLine = lipgloss.NewStyle()
+	textarea.ShowLineNumbers = false
 
 	m := model{keymap: keymap.Default, view: LoadingView, textarea: textarea}
 	err := tea.NewProgram(m).Start()

@@ -106,8 +106,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// We return here to avoid the text area capturing the key binding
 			// that led to the compose view.
 			var cmd tea.Cmd
-			// Note that we don't forward the message.
-			m.textarea, cmd = m.textarea.Update(nil)
+			// Note that we don't forward the message (i.e. the "c" key press).
+			// Rather, send a blink to the cursor.
+			m.textarea, cmd = m.textarea.Update(textarea.Blink())
 			return m, cmd
 		case key.Matches(msg, m.keymap.Tweet):
 			m.view = TweetingView
