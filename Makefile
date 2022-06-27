@@ -3,6 +3,12 @@
 
 PKG="github.com/maaslalani/twttr"
 
+build:
+	go build -o twttr
+
+install:
+	go install
+
 # Runs the program normally
 make:
 	go run .
