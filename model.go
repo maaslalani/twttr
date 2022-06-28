@@ -111,6 +111,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textarea, cmd = m.textarea.Update(textarea.Blink())
 			return m, cmd
 		case key.Matches(msg, m.keymap.Tweet):
+			m.textarea.Blur()
 			m.view = TweetingView
 			return m, m.sendTweet
 		case key.Matches(msg, m.keymap.Help):
