@@ -3,7 +3,7 @@ module github.com/maaslalani/twttr
 go 1.18
 
 require (
-	github.com/charmbracelet/bubbles v0.11.1-0.20220627132133-33d360abced2
+	github.com/charmbracelet/bubbles v0.12.1-0.20220628162924-2fd583c8ef43
 	github.com/charmbracelet/bubbletea v0.21.1-0.20220615005246-f4b89fd7dd10
 	github.com/charmbracelet/lipgloss v0.5.1-0.20220615005615-2e17a8a06096
 	github.com/muesli/reflow v0.3.0
