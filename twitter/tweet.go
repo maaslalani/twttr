@@ -1,5 +1,7 @@
 package twitter
 
+import "fmt"
+
 // CreateTweetResponseData represents the data returned from a successful tweet
 // creation.
 type CreateTweetResponseData struct {
@@ -14,6 +16,6 @@ type CreateTweetResponse struct {
 
 // CreateTweet creates a new tweet on behalf of the authenticated user.
 func CreateTweet(text string) error {
-	_, err := Twurl("/2/tweets", "-X", "POST", "-d", "text="+text)
+	_, err := Twurl("/2/tweets", "-X", "POST", "-d", fmt.Sprintf(`{"text":"%s"}`, text))
 	return err
 }
